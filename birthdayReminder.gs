@@ -69,6 +69,7 @@ function setPopupReminder(eventSeries, minsBefore) {
   Logger.log("get reminder: %s", eventSeries.getPopupReminders());
 }
 
+
 function setBirthdayReminder() {
   const now = new Date();
   const start = new Date(now.getFullYear(), 0, 1);
@@ -88,13 +89,21 @@ function setBirthdayReminder() {
   let events = getBirthdayEvent(start, end);
   let allBDEvents = bdCalendar.getEvents(start, end);
 
-  for (var i = 0; i < events.length; i++) {
+  for(let i = 0; i < events.length; i++){
     Logger.log('The %s event: %s on %s', (i + 1).toFixed(0), events[i].getTitle(), events[i].getAllDayStartDate());
     const reminderName = events[i].getTitle() + ' Reminder';
-    let foundReminders = allBDEvents.filter(x => x.getTitle().match(reminderName));
+    let foundReminders = allBDEvents.filter(x => {
+      // make regex for brackets
+      let regex = x.getTitle().replace(/\(/g,'\\(').replace(/\)/g, '\\)');
+      let matched = reminderName.match(regex);
+      // Logger.log("Regex: %s", regex);
+      // Logger.log("Matched? %s", matched);
+      return reminderName.match(regex);
+    });
 
     if (foundReminders.length == 1 && foundReminders[0].getAllDayStartDate().getTime() == events[i].getAllDayStartDate().getTime()) {
       let reminder = foundReminders[0];
+      // Logger.log("is this found one recurring? %s", reminder.isRecurringEvent());
       let eventSeries = reminder.getEventSeries();
 
       if (!reminder.isRecurringEvent()) {
